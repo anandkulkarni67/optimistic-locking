@@ -15,7 +15,7 @@ npm install
 npm run build
 ```
 
-## Compiles and minifiesthe project for production deployment
+## Compiles typescript project
 ```
 npm run build
 ```
