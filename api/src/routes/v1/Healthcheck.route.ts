@@ -1,11 +1,9 @@
 import { Request, Response, Router } from 'express';
-import { customerService } from '../../service/Customer.service';
 
 const router = Router();
 
 router.get('/', async (req: Request, res: Response) => {
   try {
-    customerService.getCustomer('urh-ewjr-sdkj-sdfk');
     res.status(200).json({
         message: "Hello World"
     });

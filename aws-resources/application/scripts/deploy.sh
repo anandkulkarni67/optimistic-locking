@@ -10,6 +10,7 @@ aws cloudformation deploy \
     --stack-name "$application_name-application" \
     --template-file $template_file \
     --region "$region" \
+    --parameter-overrides "ApplicationName=$application_name" \
     --capabilities CAPABILITY_AUTO_EXPAND
 
 if [ $? -ne 0 ]; then

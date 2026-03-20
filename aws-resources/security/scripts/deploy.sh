@@ -10,6 +10,7 @@ aws cloudformation deploy \
     --stack-name "$application_name-security" \
     --template-file $template_file \
     --region "$region" \
+    --parameter-overrides "ApplicationName=$application_name" \
     --capabilities CAPABILITY_NAMED_IAM
 
 if [ $? -ne 0 ]; then
