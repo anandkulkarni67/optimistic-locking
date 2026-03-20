@@ -1,4 +1,4 @@
-# A Serverless API deployed to AWS API Gateway served from Lambda with CICD implementation using Github actions.
+# Optimistic locking implementation using version attribute on DynamoDB Database table.
 
 ## Change directory to API
 ```
