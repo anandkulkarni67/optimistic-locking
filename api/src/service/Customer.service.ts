@@ -1,41 +1,54 @@
-import { CustomerMetadata } from '../model/CustomerMetadata';
+import { CustomerMetadata } from '../model/data/CustomerMetadata';
 import { docClient } from '../util/awsUtil';
 import { daysinFuture } from '../util/dataTime';
 import { PutCommand, UpdateCommand, DeleteCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
 import { v4 as uuidv4 } from 'uuid';
+import { NotFound } from '../model/error/NotFound';
 
 class CustomerService {
 
-    public async addCustomer(id: String, metadata: CustomerMetadata) {
+    public async addCustomer(metadata: CustomerMetadata): Promise<CustomerMetadata> {
         try {
             const customerId = uuidv4();
             const command = new PutCommand({
                 TableName: process.env.CUSTOMER_TABLE_NAME,
                 Item: {
                     CustomerId: customerId,
-                    MIDIAccessetadata: metadata,
+                    Metadata: {
+                        ...metadata,
+                        customerId
+                    },
                     Version: 1,
                     Ttl: daysinFuture(Number(process.env.TTL_DAYS))
                 }
             });
             const data = await docClient.send(command);
             console.log("Success - Customer record is successfully added", data);
-        } catch (err) {
-            console.error("Error", err);
+            return {
+                ...metadata,
+                customerId,
+                version: 1
+            }
+        } catch (error) {
+            throw error;
         }
     }
 
-    public async updateCustomer(id: String, metadata: CustomerMetadata) {
+    public async updateCustomer(customerId: String, metadata: CustomerMetadata): Promise<CustomerMetadata> {
         try {
             const command = new UpdateCommand({
                 TableName: process.env.CUSTOMER_TABLE_NAME,
                 Key: {
-                    CustomerId: id,
+                    CustomerId: customerId,
                 },
-                UpdateExpression: "set version = :newversion, metadata = :metadata",
-                ConditionExpression: "version = :currentVersion",
+                UpdateExpression: "set Version = :newversion, metadata = :metadata", // optimitstic locking using version checks.
+                ConditionExpression: "Version = :currentVersion",
                 ExpressionAttributeValues: {
-                    ":metadata": metadata,
+                    ":metadata": {
+                        ...metadata,
+                        customerId,
+                        version: metadata.version + 1
+                    },
                     ":newversion": metadata.version + 1,
                     ":currentVersion": metadata.version
                 },
@@ -43,43 +56,52 @@ class CustomerService {
             });
             const data = await docClient.send(command);
             console.log("Success - Customer record is successfully updated", data);
-        } catch (err) {
-            console.error("Error", err);
+            return {
+                ...metadata,
+                version: metadata.version + 1
+            }
+        } catch (error) {
+            throw error;
         }
     }
 
-    public async deleteCustomer(id: String, version: number) {
+    public async deleteCustomer(id: String, version: number): Promise<void> {
         try {
             const command = new DeleteCommand({
                 TableName: process.env.CUSTOMER_TABLE_NAME,
                 Key: {
                     CustomerId: id
                 },
-                ConditionExpression: "version = :currentVersion",
+                ConditionExpression: "Version = :currentVersion", // optimitstic locking using version checks.
                 ExpressionAttributeValues: {
                     ":currentVersion": version
                 },
                 ReturnValues: "ALL_OLD"
             });
-            const data = await docClient.send(command);
-            console.log("Success - Customer record is successfully deleted", data);
-        } catch (err) {
-            console.error("Error", err);
+            await docClient.send(command);
+        } catch (error) {
+            throw error;
         }
     }
 
-    public async getCustomer(id: String) {
+    public async getCustomer(customerId: String): Promise<CustomerMetadata> {
         try {
             const command = new GetCommand({
                 TableName: process.env.CUSTOMER_TABLE_NAME,
                 Key: {
-                    CustomerId: id
+                    CustomerId: customerId
                 }
             });
             const data = await docClient.send(command);
-            console.log("Success - Customer record is successfully retrived", data);
-        } catch (err) {
-            console.error("Error", err);
+            if (data.Item) {
+                return {
+                    ...data.Item.Metadata,
+                    version: data.Item.Version
+                };
+            }
+            throw new NotFound('Customer [id: ' + customerId + '] not found.');
+        } catch (error) {
+            throw error;   
         }
     }
 

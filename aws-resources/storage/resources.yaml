@@ -14,14 +14,10 @@ Resources:
       AttributeDefinitions: 
         - AttributeName: CustomerId
           AttributeType: S
-        - AttributeName: CreationDate
-          AttributeType: S
       BillingMode: PAY_PER_REQUEST
       KeySchema:
         - AttributeName: CustomerId
           KeyType: HASH
-        - AttributeName: CreationDate
-          KeyType: RANGE
       TableName: !Sub '${ApplicationName}-customer-table'
       TimeToLiveSpecification:
         AttributeName: ttl
