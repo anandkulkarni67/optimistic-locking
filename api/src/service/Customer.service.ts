@@ -23,7 +23,6 @@ class CustomerService {
                 }
             });
             const data = await docClient.send(command);
-            console.log("Success - Customer record is successfully added", data);
             return {
                 ...metadata,
                 customerId,
@@ -55,7 +54,6 @@ class CustomerService {
                 ReturnValues: "UPDATED_NEW"
             });
             const data = await docClient.send(command);
-            console.log("Success - Customer record is successfully updated", data);
             return {
                 ...metadata,
                 version: metadata.version + 1
