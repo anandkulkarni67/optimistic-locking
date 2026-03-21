@@ -2,14 +2,14 @@ import { CustomerMetadata } from '../model/data/CustomerMetadata';
 import { docClient } from '../util/awsUtil';
 import { daysinFuture } from '../util/dataTime';
 import { PutCommand, UpdateCommand, DeleteCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import { NotFound } from '../model/error/NotFound';
 
 class CustomerService {
 
     public async addCustomer(metadata: CustomerMetadata): Promise<CustomerMetadata> {
         try {
-            const customerId = uuidv4();
+            const customerId = randomUUID();
             const command = new PutCommand({
                 TableName: process.env.CUSTOMER_TABLE_NAME,
                 Item: {

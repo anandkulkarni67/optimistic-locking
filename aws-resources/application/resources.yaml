@@ -25,7 +25,15 @@ Resources:
               body: JSON.stringify('Hello from Lambda!'),
             };
           };
-      Runtime: nodejs22.x
+      Runtime: nodejs24.x
+      Environment:
+        Variables:
+          CUSTOMER_TABLE_NAME:
+            Fn::ImportValue:
+              !Sub '${ApplicationName}-customer-table'
+          TTL_DAYS: 1
+          REGION: !Ref AWS::Region
+          ENVIRONMENT: 'aws'
       Timeout: 30
   
   ApiGatewayRestApi:

@@ -7,8 +7,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: .
-      Handler: dist/app.handler
-      Runtime: nodejs22.x
+      Handler: dist/index.handler
+      Runtime: nodejs24.x
       Policies: AmazonAPIGatewayInvokeFullAccess
       Timeout: 30
       Environment:
@@ -16,6 +16,7 @@ Resources:
           CUSTOMER_TABLE_NAME: 'optimistic-locking-customer-table'
           TTL_DAYS: 1
           REGION: 'us-east-1'
+          ENVIRONMENT: 'sam-local'
       Events:
         HelloWorldApi:
           Type: Api
