@@ -29,6 +29,17 @@ Resources:
                 Action:
                   - lambda:InvokeFunction
                 Resource: '*'
+        - PolicyName: dynamodb-access-policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:UpdateItem
+                Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/optimistic-locking*'
 Outputs:
   APILambdaInvocatinRoleArn:
     Value: !GetAtt APILambdaInvocatinRole.Arn
