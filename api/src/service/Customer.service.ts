@@ -4,6 +4,7 @@ import { daysinFuture } from '../util/dataTime';
 import { PutCommand, UpdateCommand, DeleteCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
 import { randomUUID } from 'crypto';
 import { NotFound } from '../model/error/NotFound';
+import { ResourceConflict } from '../model/error/ResourceConflict';
 
 class CustomerService {
 
@@ -28,7 +29,7 @@ class CustomerService {
                 customerId,
                 version: 1
             }
-        } catch (error) {
+        } catch (error: any) {
             throw error;
         }
     }
@@ -58,17 +59,20 @@ class CustomerService {
                 ...metadata,
                 version: metadata.version + 1
             }
-        } catch (error) {
+        } catch (error: any) {
+            if (error.__type && error.__type == 'ConditionalCheckFailedException') {
+                throw new ResourceConflict('State conflict for the Customer record [ id: ' + customerId + ']')
+            }
             throw error;
         }
     }
 
-    public async deleteCustomer(id: String, version: number): Promise<void> {
+    public async deleteCustomer(customerId: String, version: number): Promise<void> {
         try {
             const command = new DeleteCommand({
                 TableName: process.env.CUSTOMER_TABLE_NAME,
                 Key: {
-                    CustomerId: id
+                    CustomerId: customerId
                 },
                 ConditionExpression: "Version = :currentVersion", // optimitstic locking using version checks.
                 ExpressionAttributeValues: {
@@ -77,7 +81,10 @@ class CustomerService {
                 ReturnValues: "ALL_OLD"
             });
             await docClient.send(command);
-        } catch (error) {
+        } catch (error: any) {
+            if (error.__type && error.__type == 'ConditionalCheckFailedException') {
+                throw new ResourceConflict('State conflict for the Customer record [ id: ' + customerId + ']')
+            }
             throw error;
         }
     }
@@ -98,7 +105,7 @@ class CustomerService {
                 };
             }
             throw new NotFound('Customer [id: ' + customerId + '] not found.');
-        } catch (error) {
+        } catch (error: any) {
             throw error;   
         }
     }

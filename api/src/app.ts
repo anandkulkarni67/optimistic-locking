@@ -3,6 +3,7 @@ import routes from './routes';
 import { NotFound } from './model/error/NotFound';
 import { SystemError } from './model/error/SystemError';
 import { ValidationError } from './model/error/ValidationError';
+import { ResourceConflict } from './model/error/ResourceConflict';
 
 const app = express();
 
@@ -17,12 +18,16 @@ app.use((req: express.Request, res: express.Response, next: express.NextFunction
 app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   switch (error.constructor) {
     case NotFound:
-      res.status(404).send(error);
+      res.status(404).json(error);
       break;
     case ValidationError:
-      res.status(400).send(error);
+      res.status(400).json(error);
+      break;
+    case ResourceConflict:
+      res.status(409).json(error);
+      break;
     default:
-      res.status(500).send(new SystemError(error.message));
+      res.status(500).json(new SystemError(error.message));
       break;
   }
 });
