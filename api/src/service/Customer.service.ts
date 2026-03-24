@@ -60,7 +60,7 @@ class CustomerService {
                 version: metadata.version + 1
             }
         } catch (error: any) {
-            if (error.__type && error.__type == 'ConditionalCheckFailedException') {
+            if (error.message && error.errorType == 'The conditional request failed') {
                 throw new ResourceConflict('State conflict for the Customer record [ id: ' + customerId + ']')
             }
             throw error;
@@ -82,7 +82,7 @@ class CustomerService {
             });
             await docClient.send(command);
         } catch (error: any) {
-            if (error.__type && error.__type == 'ConditionalCheckFailedException') {
+            if (error.message && error.errorType == 'The conditional request failed') {
                 throw new ResourceConflict('State conflict for the Customer record [ id: ' + customerId + ']')
             }
             throw error;
