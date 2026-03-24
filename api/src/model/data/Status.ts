@@ -5,9 +5,11 @@ export class Status {
 
     service: Service;
     status: ServiceStatusValue;
+    metadata?: Object;
 
-    constructor(service: Service, status: ServiceStatusValue) {
+    constructor(service: Service, status: ServiceStatusValue, metadata?: Object) {
         this.service = service;
         this.status = status;
+        this.metadata = metadata;
     }
 }

@@ -1,9 +1,11 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
+import { getEnvironment } from '../util/environment';
+import { Environment } from "../model/data/Environment";
 
 const createDynamoDBClient = () => {
-    switch (process.env.ENVIRONMENT) {
-        case 'local':
+    switch (getEnvironment()) {
+        case Environment.LOCAL:
             return new DynamoDBClient({
                 region: process.env.REGION,
                 endpoint: "http://localhost:4566",
@@ -12,7 +14,7 @@ const createDynamoDBClient = () => {
                     secretAccessKey: "dummy-secret-key",
                 },
             });
-        case 'sam-local':
+        case Environment.AWS_SAM:
             return new DynamoDBClient({
                 region: process.env.REGION,
                 endpoint: "http://host.docker.internal:4566",
@@ -21,7 +23,7 @@ const createDynamoDBClient = () => {
                     secretAccessKey: "dummy-secret-key",
                 },
             });
-        case 'aws':
+        case Environment.AWS:
             return new DynamoDBClient({
                 region: process.env.REGION
             });
