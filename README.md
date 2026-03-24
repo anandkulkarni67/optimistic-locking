@@ -10,11 +10,6 @@ cd api
 npm install
 ```
 
-## Compiles the project
-```
-npm run build
-```
-
 ## Compiles typescript project
 ```
 npm run build
@@ -22,9 +17,13 @@ npm run build
 
 ## Run the api locally
 ```
+AWS_SAM:
 sam local start-api --template-file serverless.yaml
+sample http request: http://127.0.0.1:3000/v1/healthcheck/app
 
-sample http request: http://127.0.0.1:3000/v1/greet
+NPM:
+npm run serve
+sample http request: http://localhost:3000/v1/healthcheck/app
 ```
 
 ## GitHub integration
