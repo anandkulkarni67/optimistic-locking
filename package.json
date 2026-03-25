@@ -1,6 +1,6 @@
 {
   "name": "optimistic-locking",
-  "version": "1.0.13",
+  "version": "1.0.15",
   "description": "optimistic locking implementation",
   "homepage": "https://github.com/anandkulkarni67/serverless-api#readme",
   "bugs": {
