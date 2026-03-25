@@ -52,7 +52,7 @@ class CustomerService {
                     ":newversion": metadata.version + 1,
                     ":currentVersion": metadata.version
                 },
-                ReturnValues: "UPDATED_NEW"
+                ReturnValuesOnConditionCheckFailure: "ALL_OLD"
             });
             const data = await docClient.send(command);
             return {
@@ -61,7 +61,13 @@ class CustomerService {
             }
         } catch (error: any) {
             if (error.message && error.message == 'The conditional request failed') {
-                throw new ResourceConflict('State conflict for the Customer record [ id: ' + customerId + ']')
+                if (error.Item) {
+                    if ( error.Item.Version.N != metadata.version) {
+                        throw new ResourceConflict('State conflict for the Customer record [ customerId: ' + customerId + ' ]')
+                    }
+                } else {
+                    throw new NotFound('Customer with [ customerId: ' + customerId + ' ] not found.');
+                }
             }
             throw error;
         }
@@ -78,12 +84,18 @@ class CustomerService {
                 ExpressionAttributeValues: {
                     ":currentVersion": version
                 },
-                ReturnValues: "ALL_OLD"
+                ReturnValuesOnConditionCheckFailure: "ALL_OLD"
             });
             await docClient.send(command);
         } catch (error: any) {
             if (error.message && error.message == 'The conditional request failed') {
-                throw new ResourceConflict('State conflict for the Customer record [ id: ' + customerId + ']')
+                if (error.Item) {
+                    if ( error.Item.Version.N != version) {
+                        throw new ResourceConflict('State conflict for the Customer record [ customerId: ' + customerId + ' ]')
+                    }
+                } else {
+                    throw new NotFound('Customer with [ customerId: ' + customerId + ' ] not found.');
+                }
             }
             throw error;
         }
